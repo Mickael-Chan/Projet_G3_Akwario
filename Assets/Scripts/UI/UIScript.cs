@@ -42,6 +42,9 @@ public class UIScript : MonoBehaviour
     [Header("Menu Mort")]
     public GameObject deadPanel;
 
+    //loading script
+
+    public GameObject loadingPanel;
  
 
     private void Start()
@@ -56,6 +59,9 @@ public class UIScript : MonoBehaviour
     {
         power01CDDisplay.text = Mathf.Round(player.power01Cooldown).ToString();
         power02CDDisplay.text = Mathf.Round(player.power02Cooldown).ToString();
+
+
+
 
         if (player != null)
         {
@@ -141,12 +147,16 @@ public class UIScript : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Escape) && player.playerIsDead == false)
         {
             MenuPauseActivator();
+            
         }
         
     }
 
     public void MenuPauseActivator()
     {
+
+        Debug.Log("Pause");
+
         if (SceneManager.GetActiveScene().buildIndex == 1)
         {
             menuPausePanel.SetActive(!menuPausePanel.activeSelf);

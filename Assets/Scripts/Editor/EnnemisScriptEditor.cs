@@ -13,7 +13,8 @@ public class EnnemisScriptEditor : Editor
         
         if (myScript.ennemisSelected == EnnemisScript.ennemisList.oursin)
         {
-            myScript.oursinShape = (GameObject)EditorGUILayout.ObjectField("Oursin Shape", myScript.oursinShape, typeof(object), true);
+           // myScript.oursinShape = (Transform)EditorGUILayout.ObjectField("Oursin Shape", myScript.oursinShape, typeof(Transform), true);
+
         }
         if (myScript.ennemisSelected == EnnemisScript.ennemisList.poissonLanterne)
         {

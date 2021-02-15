@@ -6,25 +6,14 @@ using UnityEngine.EventSystems;
 
 public class MainMenu : MonoBehaviour
 {
-    public EventSystem eventButton;
-    public GameObject buttonSelected;
-
-    private void OnEnable()
+    public void PlayGame (int index)
     {
-        eventButton.SetSelectedGameObject(buttonSelected);
-    }
-
-    public void PlayGame ()
-    {
-        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
-        
+        SceneManager.LoadScene(index);     
     }
 
     public void QuitGame ()
     {
-        Debug.Log("QUIT!");
         Application.Quit();
-
     }
 
 

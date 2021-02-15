@@ -46,6 +46,10 @@ public class BubbleScript : MonoBehaviour
         {
             Destroy(collision.gameObject);
         }
-        Destroy(gameObject);
+        if (!collision.transform.CompareTag("Player"))
+        {
+            Destroy(gameObject);
+        }
+        
     }
 }

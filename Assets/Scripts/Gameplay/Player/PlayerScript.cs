@@ -44,6 +44,7 @@ public class PlayerScript : MonoBehaviour
     public float fallMultiplier;
     public float lowJumpMultiplier;
     public Animator playerAnimator;
+    public bool playerAttackedDirection;
 
     private int playerPvTmp;
     private int playerJumpCount;
@@ -147,7 +148,7 @@ public class PlayerScript : MonoBehaviour
 
         playerRB = this.GetComponent<Rigidbody>();
         playerJumpCount = 1;
-        rayBox = new Vector3(transform.localScale.x / 10, transform.localScale.y / 2.1f, transform.localScale.z / 2);
+        rayBox = new Vector3(transform.localScale.x / 10, transform.localScale.y * 0.75f, transform.localScale.z / 2);
         playerDirection = true;
 
         // Initialization Controller
@@ -353,18 +354,18 @@ public class PlayerScript : MonoBehaviour
 
         if (playerDirection)
         {
-            obstacleIsHit = Physics.BoxCast(this.transform.position, rayBox, Vector3.right, out obstacleRayHit, Quaternion.identity, 10f, playerGroundMask);
+            obstacleIsHit = Physics.BoxCast(new Vector3(this.transform.position.x, this.transform.position.y + 0.45f, this.transform.position.z), rayBox, Vector3.right, out obstacleRayHit, Quaternion.identity, 10f, playerGroundMask);
             ennemisIsHit = Physics.Raycast(this.transform.position, Vector3.right, out ennemisRayHit, bumpMaxDistance);
         }
         else
         {
-            obstacleIsHit = Physics.BoxCast(this.transform.position, rayBox, Vector3.left, out obstacleRayHit, Quaternion.identity, 10f, playerGroundMask);
+            obstacleIsHit = Physics.BoxCast(new Vector3(this.transform.position.x, this.transform.position.y + 0.45f,this.transform.position.z), rayBox, Vector3.left, out obstacleRayHit, Quaternion.identity, 10f, playerGroundMask);
             ennemisIsHit = Physics.Raycast(this.transform.position, Vector3.left, out ennemisRayHit, bumpMaxDistance);
         }
 
         if (!playerIsGrounded)
         {
-            if (obstacleIsHit && (Mathf.Abs(obstacleRayHit.point.x - this.transform.position.x) < 5f))
+            if (obstacleIsHit && (Mathf.Abs(obstacleRayHit.point.x - this.transform.position.x) < 3))
             {
                 playerIsBlocked = true;
             }
@@ -379,10 +380,7 @@ public class PlayerScript : MonoBehaviour
             playerIsBlocked = false;
             playerJumpCount = 1;
         }
-        else
-        {
-            playerJumpCount = 0;
-        }
+       
 
 
         if (!playerIsBlocked)
@@ -425,11 +423,12 @@ public class PlayerScript : MonoBehaviour
         }
         playerAnimator.SetFloat("Speed", Mathf.Abs(gameController.Gameplay.Move.ReadValue<float>()) + 1);
 
-        if (playerIsGrounded && Input.GetButtonDown("Jump"))
+        if (playerJumpCount > 0 && Input.GetButtonDown("Jump"))
         {
             playerIsJumping = true;
             JumpTimeCounter = JumpTime;
-            playerRB.velocity = new Vector3(playerRB.velocity.x, 10, 0);
+            playerRB.velocity = new Vector3(playerRB.velocity.x, playerJumpHeight, 0);
+            playerJumpCount = 0;
 
         }
 
@@ -437,9 +436,9 @@ public class PlayerScript : MonoBehaviour
         {
             if (JumpTimeCounter > 0)
             {
-                playerRB.velocity = new Vector3(playerRB.velocity.x, 10, 0);
+                playerRB.velocity = new Vector3(playerRB.velocity.x, playerJumpHeight, 0);
                 JumpTimeCounter -= Time.deltaTime;
-
+                playerJumpCount = 0;
             }
             else
             {
@@ -461,7 +460,7 @@ public class PlayerScript : MonoBehaviour
         {
             if (obstacleRayHit.transform.CompareTag("Ground"))
             {
-                if (Mathf.Abs(obstacleRayHit.point.x - this.transform.position.x) < 5f)
+                if (Mathf.Abs(obstacleRayHit.point.x - this.transform.position.x) < 3)
                 {
                     Gizmos.color = Color.red;
                 }
@@ -474,13 +473,13 @@ public class PlayerScript : MonoBehaviour
 
             if (playerDirection)
             {
-                Gizmos.DrawRay(transform.position, Vector3.right * obstacleRayHit.distance);
-                Gizmos.DrawWireCube(transform.position + Vector3.right * obstacleRayHit.distance, new Vector3(transform.localScale.x / 5f, transform.localScale.y, transform.localScale.z));
+                Gizmos.DrawRay(new Vector3(this.transform.position.x, this.transform.position.y + 0.45f, this.transform.position.z), Vector3.right * obstacleRayHit.distance);
+                Gizmos.DrawWireCube(new Vector3(this.transform.position.x, this.transform.position.y + 0.45f, this.transform.position.z) + Vector3.right * obstacleRayHit.distance, new Vector3(transform.localScale.x / 5f, transform.localScale.y*1.4f, transform.localScale.z));
             }
             else
             {
-                Gizmos.DrawRay(transform.position, Vector3.left * obstacleRayHit.distance);
-                Gizmos.DrawWireCube(transform.position + Vector3.left * obstacleRayHit.distance, new Vector3(transform.localScale.x / 5f, transform.localScale.y, transform.localScale.z));
+                Gizmos.DrawRay(new Vector3(this.transform.position.x, this.transform.position.y + 0.45f, this.transform.position.z), Vector3.left * obstacleRayHit.distance);
+                Gizmos.DrawWireCube(new Vector3(this.transform.position.x, this.transform.position.y + 0.45f, this.transform.position.z) + Vector3.left * obstacleRayHit.distance, new Vector3(transform.localScale.x / 5f, transform.localScale.y*1.4f, transform.localScale.z));
             }
 
         }
@@ -521,7 +520,7 @@ public class PlayerScript : MonoBehaviour
 
         // PLayer Movement 
 
-        playerIsGrounded = Physics.CheckSphere(playerGroundCheck.position, 0.1f, playerGroundMask);
+        playerIsGrounded = Physics.CheckSphere(playerGroundCheck.position, 0.15f, playerGroundMask);
 
         if (Mathf.Abs(playerRB.velocity.x) > playerMaxSpeed)
         {
@@ -553,11 +552,11 @@ public class PlayerScript : MonoBehaviour
 
         if (playerDashTime > 0)
         {
-            if (playerDirection && playerIsAttacked)
+            if (!playerAttackedDirection && playerIsAttacked)
             {
                 playerRB.velocity = (Vector3.left * playerDashSpeed * Time.deltaTime);
             }
-            else if (!playerDirection && playerIsAttacked)
+            else if (playerAttackedDirection && playerIsAttacked)
             {
                 playerRB.velocity = (Vector3.right * playerDashSpeed * Time.deltaTime);
             }
@@ -620,14 +619,9 @@ public class PlayerScript : MonoBehaviour
 
     IEnumerator UnBlocker(float time)
     {
-        if (playerDirection)
-        {
-            playerRB.AddForce(Vector3.left * 3000);
-        }
-        else
-        {
-            playerRB.AddForce(Vector3.right * 3000);
-        }
+        
+        playerRB.AddForce(Vector3.up * 1500);
+        
         yield return new WaitForSeconds(time);
     }
 
